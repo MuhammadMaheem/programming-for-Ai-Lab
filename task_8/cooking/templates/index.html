@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe Finder - Discover Delicious Recipes</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <h1>🍳 Recipe Finder</h1>
+            </div>
+            <div class="nav-buttons">
+                <button class="btn-icon" id="randomBtn" title="Get Random Recipe">
+                    <span class="icon">🎲</span> Random Recipe
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Search Section -->
+        <section class="search-section">
+            <div class="search-container">
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    class="search-input" 
+                    placeholder="Search for recipes (e.g., pasta, pizza, chicken)..."
+                    autocomplete="off"
+                >
+                <button class="btn-search" id="searchBtn">🔍 Search</button>
+            </div>
+            <div class="search-suggestions">
+                <p>Popular searches:</p>
+                <div class="suggestion-tags">
+                    <button class="tag" onclick="searchRecipe('Pasta')">Pasta</button>
+                    <button class="tag" onclick="searchRecipe('Pizza')">Pizza</button>
+                    <button class="tag" onclick="searchRecipe('Chicken')">Chicken</button>
+                    <button class="tag" onclick="searchRecipe('Fish')">Fish</button>
+                    <button class="tag" onclick="searchRecipe('Vegetarian')">Vegetarian</button>
+                    <button class="tag" onclick="searchRecipe('Dessert')">Dessert</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Categories Section -->
+        <section class="categories-section">
+            <h2>Browse by Category</h2>
+            <div class="categories-grid" id="categoriesGrid">
+                <div class="spinner"></div>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section class="results-section" id="resultsSection" style="display: none;">
+            <div class="results-header">
+                <h2>Results for "<span id="searchQuery"></span>"</h2>
+                <p class="result-count"><span id="resultCount">0</span> recipes found</p>
+            </div>
+            <div class="recipes-grid" id="recipesGrid">
+                <div class="spinner"></div>
+            </div>
+        </section>
+
+        <!-- Empty State -->
+        <section class="empty-state" id="emptyState" style="display: none;">
+            <div class="empty-content">
+                <p class="empty-icon">🥗</p>
+                <h2>No recipes found</h2>
+                <p>Try searching with different keywords or browse categories above</p>
+            </div>
+        </section>
+    </div>
+
+    <!-- Modal for Recipe Details -->
+    <div class="modal" id="recipeModal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+            <div class="modal-header">
+                <img id="modalImage" src="" alt="Recipe" class="modal-image">
+                <div class="modal-info">
+                    <h1 id="modalTitle"></h1>
+                    <div class="modal-badges">
+                        <span class="badge" id="modalCategory"></span>
+                        <span class="badge" id="modalCuisine"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-body">
+                <!-- Ingredients -->
+                <div class="ingredients-section">
+                    <h2>📝 Ingredients</h2>
+                    <ul id="ingredientsList" class="ingredients-list"></ul>
+                </div>
+
+                <!-- Instructions -->
+                <div class="instructions-section">
+                    <h2>👨‍🍳 Instructions</h2>
+                    <div id="instructionsText" class="instructions-text"></div>
+                </div>
+
+                <!-- Tags -->
+                <div id="tagsSection" class="tags-section" style="display: none;">
+                    <h2>Tags</h2>
+                    <div id="tagsList" class="tags-list"></div>
+                </div>
+
+                <!-- Video Link -->
+                <div id="videoSection" class="video-section" style="display: none;">
+                    <h2>👀 Watch Video</h2>
+                    <a id="videoLink" href="#" target="_blank" class="btn-video">Watch on YouTube</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Recipe Finder | Powered by <a href="https://www.themealdb.com/" target="_blank">TheMealDB API</a></p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookFinder API - Open Library Search</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>📚 BookFinder</h1>
+            <p class="subtitle">Search millions of books using the Open Library API</p>
+        </header>
+
+        <div class="api-status">
+            <span id="status-indicator" class="status-dot"></span>
+            <span id="status-text">Checking API status...</span>
+        </div>
+
+        <div class="search-section">
+            <div class="search-container">
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    class="search-input" 
+                    placeholder="Search by title, author, ISBN, or keyword..."
+                    autocomplete="off"
+                >
+                <button id="searchBtn" class="search-btn">Search</button>
+            </div>
+            
+            <div class="quick-filters">
+                <button class="filter-btn" data-query="Harry Potter">Harry Potter</button>
+                <button class="filter-btn" data-query="The Lord of the Rings">Lord of the Rings</button>
+                <button class="filter-btn" data-query="Sherlock Holmes">Sherlock Holmes</button>
+                <button class="filter-btn" data-query="science fiction">Science Fiction</button>
+            </div>
+        </div>
+
+        <div id="resultsContainer" class="results-container hidden">
+            <div class="results-header">
+                <h2>Search Results</h2>
+                <span id="resultCount" class="result-count"></span>
+            </div>
+            <div id="resultsList" class="results-list"></div>
+            <div class="pagination">
+                <button id="prevBtn" class="pagination-btn">← Previous</button>
+                <span id="pageInfo" class="page-info"></span>
+                <button id="nextBtn" class="pagination-btn">Next →</button>
+            </div>
+        </div>
+
+        <div id="loadingContainer" class="loading-container hidden">
+            <div class="spinner"></div>
+            <p>Searching books...</p>
+        </div>
+
+        <div id="errorContainer" class="error-container hidden">
+            <p id="errorText"></p>
+            <button class="close-btn" onclick="hideError()">✕</button>
+        </div>
+
+        <div id="emptyContainer" class="empty-container hidden">
+            <p>No books found. Try a different search query.</p>
+        </div>
+
+        <!-- Book Details Modal -->
+        <div id="bookModal" class="modal hidden">
+            <div class="modal-content">
+                <button class="modal-close" onclick="closeBookModal()">✕</button>
+                <div id="modalBody" class="modal-body"></div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>Powered by <a href="https://openlibrary.org" target="_blank">Open Library API</a> | No API key required</p>
+            <p class="api-note">Using the stable, free Open Library API maintained by the Internet Archive</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

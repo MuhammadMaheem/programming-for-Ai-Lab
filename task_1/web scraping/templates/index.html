@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Scraper - Professional Web Scraping Tool</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .content {
+            padding: 40px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+
+        /* Desktop Layout */
+        @media (min-width: 1024px) {
+            .content {
+                grid-template-columns: 1fr 1fr;
+                gap: 40px;
+                max-width: 1400px;
+                margin: 0 auto;
+            }
+
+            .full-width {
+                grid-column: 1 / -1;
+            }
+
+            .header {
+                padding: 60px 40px;
+            }
+
+            .header h1 {
+                font-size: 42px;
+            }
+
+            .header p {
+                font-size: 18px;
+            }
+
+            .card {
+                padding: 35px;
+                border-radius: 16px;
+            }
+
+            .card h2 {
+                font-size: 22px;
+                margin-bottom: 20px;
+            }
+
+            .upload-area {
+                padding: 50px;
+                border-radius: 16px;
+            }
+
+            .upload-area h3 {
+                font-size: 18px;
+                margin-bottom: 10px;
+            }
+
+            .feature-list {
+                font-size: 16px;
+            }
+
+            .feature-list li {
+                margin-bottom: 12px;
+            }
+        }
+
+        .card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 30px;
+            border: 2px dashed #e0e0e0;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+        }
+
+        .card h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .card p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .upload-area {
+            background: white;
+            border: 3px dashed #667eea;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .upload-area:hover {
+            background: #f8f9ff;
+            border-color: #764ba2;
+        }
+
+        .upload-area.dragover {
+            background: #f0f3ff;
+            border-color: #764ba2;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #667eea;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .selected-file {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f5e9;
+            border-radius: 8px;
+            color: #2e7d32;
+            font-weight: 500;
+            display: none;
+        }
+
+        .progress-container {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .live-progress {
+            display: none;
+            background: #f8f9ff;
+            border: 2px solid #667eea;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .progress-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .current-url {
+            font-size: 14px;
+            color: #667eea;
+            word-break: break-all;
+        }
+
+        .status-message {
+            margin-top: 15px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .result-card {
+            display: none;
+            background: #e8f5e9;
+            border: 2px solid #4caf50;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+
+        .result-card h3 {
+            color: #2e7d32;
+            margin-bottom: 15px;
+        }
+
+        .result-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .error-message {
+            display: none;
+            background: #ffebee;
+            border: 2px solid #f44336;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin-top: 15px;
+        }
+
+        .feature-list li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+            color: #555;
+        }
+
+        .feature-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #4caf50;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .header p {
+                font-size: 14px;
+            }
+
+            .content {
+                padding: 20px;
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .upload-area {
+                padding: 30px 20px;
+            }
+        }
+
+        /* Tablet adjustments */
+        @media (max-width: 1024px) and (min-width: 601px) {
+            .content {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
+
+            .full-width {
+                grid-column: 1 / -1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Email Scraper</h1>
+            <p>Professional Web Scraping Tool for Email Extraction</p>
+        </div>
+
+        <div class="content">
+            <!-- Instructions Card -->
+            <div class="card">
+                <h2>📋 How It Works</h2>
+                <ul class="feature-list">
+                    <li>Download the sample CSV template below</li>
+                    <li>Add your website URLs in the 'Website' column</li>
+                    <li>Upload your file (CSV or Excel format)</li>
+                    <li>Watch live progress as we scrape each website</li>
+                    <li>Download the results with extracted emails</li>
+                </ul>
+            </div>
+
+            <!-- Sample Download Card -->
+            <div class="card">
+                <h2>📥 Download Sample Template</h2>
+                <p>Get the sample CSV template with the correct format and column names.</p>
+                <div class="button-group">
+                    <a href="/download-sample" class="btn btn-secondary">Download Sample CSV</a>
+                </div>
+            </div>
+
+            <!-- Upload Card -->
+            <div class="card full-width">
+                <h2>📤 Upload Your File</h2>
+                <p>Upload a CSV or Excel file containing website URLs to scrape for emails.</p>
+
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📁</div>
+                    <h3>Click to upload or drag and drop</h3>
+                    <p style="margin-top: 10px; color: #999;">CSV or Excel files (max 16MB)</p>
+                    <input type="file" id="fileInput" accept=".csv,.xlsx,.xls">
+                </div>
+
+                <div class="selected-file" id="selectedFile"></div>
+
+                <div class="button-group" style="margin-top: 20px;">
+                    <button class="btn" id="uploadBtn" disabled>Start Processing</button>
+                    <button class="btn btn-secondary" id="resetBtn" style="display: none;">Reset</button>
+                </div>
+
+                <div class="progress-container" id="progressContainer">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="status-message" id="statusMessage">Processing your file...</div>
+                </div>
+
+                <!-- Live Progress Display -->
+                <div class="live-progress" id="liveProgress">
+                    <div class="progress-text" id="progressText">Initializing...</div>
+                    <div class="current-url" id="currentUrl"></div>
+                </div>
+
+                <div class="error-message" id="errorMessage"></div>
+
+                <div class="result-card" id="resultCard">
+                    <h3>✅ Processing Complete!</h3>
+                    <div class="result-stats" id="resultStats"></div>
+                    <div class="button-group">
+                        <button class="btn" id="downloadBtn">Download Results</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Email Scraper Pro | Professional Web Scraping Solution</p>
+        </div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const selectedFile = document.getElementById('selectedFile');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressFill = document.getElementById('progressFill');
+        const liveProgress = document.getElementById('liveProgress');
+        const progressText = document.getElementById('progressText');
+        const currentUrl = document.getElementById('currentUrl');
+        const statusMessage = document.getElementById('statusMessage');
+        const errorMessage = document.getElementById('errorMessage');
+        const resultCard = document.getElementById('resultCard');
+        const resultStats = document.getElementById('resultStats');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        let selectedFileObj = null;
+        let resultFilename = null;
+        let sessionId = null;
+        let eventSource = null;
+
+        // Upload area click
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // File selection
+        fileInput.addEventListener('change', (e) => {
+            handleFileSelect(e.target.files[0]);
+        });
+
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            handleFileSelect(e.dataTransfer.files[0]);
+        });
+
+        function handleFileSelect(file) {
+            if (!file) return;
+
+            const validTypes = ['.csv', '.xlsx', '.xls'];
+            const fileExt = '.' + file.name.split('.').pop().toLowerCase();
+
+            if (!validTypes.includes(fileExt)) {
+                showError('Please select a CSV or Excel file.');
+                return;
+            }
+
+            selectedFileObj = file;
+            selectedFile.textContent = `Selected: ${file.name} (${(file.size / 1024).toFixed(2)} KB)`;
+            selectedFile.style.display = 'block';
+            uploadBtn.disabled = false;
+            resetBtn.style.display = 'inline-block';
+            hideError();
+            hideResult();
+        }
+
+        // Upload button
+        uploadBtn.addEventListener('click', async () => {
+            if (!selectedFileObj) return;
+
+            // Generate session ID
+            sessionId = Date.now().toString();
+
+            const formData = new FormData();
+            formData.append('file', selectedFileObj);
+            formData.append('session_id', sessionId);
+
+            uploadBtn.disabled = true;
+            resetBtn.style.display = 'none';
+            progressContainer.style.display = 'block';
+            liveProgress.style.display = 'block';
+            progressText.textContent = 'Starting processing...';
+            currentUrl.textContent = '';
+            hideError();
+            hideResult();
+
+            // Start listening for progress updates
+            startProgressListener();
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    resultFilename = data.result_file;
+                    showResult(data);
+                } else {
+                    showError(data.error || 'An error occurred during processing.');
+                }
+            } catch (error) {
+                showError('Network error. Please try again.');
+            } finally {
+                progressContainer.style.display = 'none';
+                liveProgress.style.display = 'none';
+                uploadBtn.disabled = false;
+                resetBtn.style.display = 'inline-block';
+                stopProgressListener();
+            }
+        });
+
+        function startProgressListener() {
+            if (eventSource) {
+                eventSource.close();
+            }
+
+            eventSource = new EventSource(`/progress/${sessionId}`);
+
+            eventSource.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+
+                if (data.type === 'scraping') {
+                    progressText.textContent = `[${data.current}/${data.total}] Scraping:`;
+                    currentUrl.textContent = data.url;
+                    const percentage = (data.current / data.total) * 100;
+                    progressFill.style.width = percentage + '%';
+                } else if (data.type === 'completed') {
+                    progressText.textContent = 'Processing complete!';
+                    currentUrl.textContent = `Found ${data.emails_found} emails from ${data.total_urls} URLs`;
+                    progressFill.style.width = '100%';
+                }
+            };
+
+            eventSource.onerror = function() {
+                console.log('EventSource error');
+            };
+        }
+
+        function stopProgressListener() {
+            if (eventSource) {
+                eventSource.close();
+                eventSource = null;
+            }
+        }
+
+        // Reset button
+        resetBtn.addEventListener('click', () => {
+            fileInput.value = '';
+            selectedFileObj = null;
+            selectedFile.style.display = 'none';
+            uploadBtn.disabled = true;
+            resetBtn.style.display = 'none';
+            hideError();
+            hideResult();
+            progressContainer.style.display = 'none';
+            liveProgress.style.display = 'none';
+            stopProgressListener();
+        });
+
+        // Download button
+        downloadBtn.addEventListener('click', () => {
+            if (resultFilename) {
+                window.location.href = `/download-results/${resultFilename}`;
+            }
+        });
+
+        function showResult(data) {
+            resultStats.innerHTML = `
+                <div class="stat">
+                    <div class="stat-value">${data.total_urls}</div>
+                    <div class="stat-label">Total URLs</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">${data.emails_found}</div>
+                    <div class="stat-label">Emails Found</div>
+                </div>
+            `;
+            resultCard.style.display = 'block';
+        }
+
+        function hideResult() {
+            resultCard.style.display = 'none';
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+        }
+
+        function hideError() {
+            errorMessage.style.display = 'none';
+        }
+    </script>
+</body>
+</html>

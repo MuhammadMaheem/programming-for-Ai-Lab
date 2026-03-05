@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hand Gesture Recognition</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            max-width: 900px;
+            width: 90%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            color: #667eea;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header p {
+            color: #777;
+            font-size: 1.1em;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 1em;
+            color: #777;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-btn:hover {
+            color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .camera-section, .upload-section, .info-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 640px;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        #video-stream {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .upload-area {
+            width: 100%;
+            max-width: 600px;
+            padding: 30px;
+            border: 2px dashed #667eea;
+            border-radius: 10px;
+            text-align: center;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: #f0f0ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #764ba2;
+            background: #e8e8ff;
+        }
+
+        .upload-area p {
+            color: #667eea;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        .result-container {
+            width: 100%;
+            max-width: 600px;
+            display: none;
+        }
+
+        .result-image {
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .detection-results {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .detection-item {
+            padding: 12px;
+            background: white;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .gesture-name {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .gesture-confidence {
+            color: #999;
+            font-size: 0.9em;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            width: 100%;
+        }
+
+        .gesture-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .gesture-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .gesture-card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .gesture-card p {
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .status {
+            padding: 12px 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .status.success {
+            display: block;
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            display: block;
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.loading {
+            display: block;
+            background: #cce5ff;
+            color: #004085;
+            border: 1px solid #b8daff;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 50%;
+            border-top-color: #667eea;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-icon {
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .loading .loading-icon::after {
+            content: '';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        .no-gestures {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤚 Hand Gesture Recognition</h1>
+            <p>AI-powered hand gesture detection using OpenCV and MediaPipe</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('camera')">Live Camera</button>
+            <button class="tab-btn" onclick="switchTab('upload')">Upload Image</button>
+            <button class="tab-btn" onclick="switchTab('info')">Gesture Guide</button>
+        </div>
+
+        <!-- Live Camera Tab -->
+        <div id="camera" class="tab-content active">
+            <div class="camera-section">
+                <div class="video-container">
+                    <img id="video-stream" src="{{ url_for('video_feed') }}" alt="Camera Stream">
+                </div>
+                <div class="controls">
+                    <button class="btn btn-secondary" id="refresh-btn" onclick="refreshCamera()">Refresh Camera</button>
+                    <button class="btn btn-danger" id="stop-btn" onclick="stopCamera()">Stop Camera</button>
+                </div>
+                <div class="status loading" id="camera-status">
+                    <span class="loading-icon">Loading</span> Initializing camera...
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload Image Tab -->
+        <div id="upload" class="tab-content">
+            <div class="upload-section">
+                <div class="upload-area" id="upload-area" onclick="document.getElementById('file-input').click();">
+                    <p>📁 Drag & drop your image here</p>
+                    <p style="color: #999; font-size: 0.9em;">or click to select</p>
+                </div>
+                <input id="file-input" type="file" accept="image/*" onchange="handleFileSelect(event)">
+                
+                <div class="controls">
+                    <button class="btn btn-secondary" onclick="resetUpload()">Clear</button>
+                </div>
+
+                <div class="status" id="upload-status"></div>
+                <div class="result-container" id="result-container">
+                    <img id="result-image" class="result-image" src="" alt="Detected gestures">
+                    <div class="detection-results" id="detection-results"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gesture Guide Tab -->
+        <div id="info" class="tab-content">
+            <div class="info-section">
+                <h2 style="color: #667eea; margin-bottom: 20px;">Supported Hand Gestures</h2>
+                <div class="info-grid" id="gesture-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+
+            // Load gesture info when switching to info tab
+            if (tabName === 'info') {
+                loadGestureInfo();
+            }
+        }
+
+        // Camera functions
+        function refreshCamera() {
+            location.reload();
+        }
+
+        function stopCamera() {
+            fetch('/stop_camera', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('camera-status').className = 'status success';
+                    document.getElementById('camera-status').innerHTML = '✓ Camera stopped';
+                })
+                .catch(error => {
+                    document.getElementById('camera-status').className = 'status error';
+                    document.getElementById('camera-status').innerHTML = '✗ Error stopping camera';
+                });
+        }
+
+        // File upload
+        const uploadArea = document.getElementById('upload-area');
+
+        uploadArea.addEventListener('dragover', () => {
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                document.getElementById('file-input').files = files;
+                handleFileSelect({ target: { files: files } });
+            }
+        });
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const statusDiv = document.getElementById('upload-status');
+            const resultContainer = document.getElementById('result-container');
+
+            statusDiv.className = 'status loading';
+            statusDiv.innerHTML = '<span class="spinner"></span> Processing image...';
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('/detect_image', { method: 'POST', body: formData })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        document.getElementById('result-image').src = data.image_path;
+                        
+                        const detectionsHtml = data.detections.length > 0 ?
+                            data.detections.map(d => `
+                                <div class="detection-item">
+                                    <div>
+                                        <div class="gesture-name">${d.gesture}</div>
+                                        <div class="gesture-confidence">${d.handedness} • Confidence: ${(d.confidence * 100).toFixed(1)}%</div>
+                                    </div>
+                                </div>
+                            `).join('') :
+                            '<div class="no-gestures">No hands detected in the image</div>';
+                        
+                        document.getElementById('detection-results').innerHTML = detectionsHtml;
+                        resultContainer.style.display = 'block';
+                        
+                        statusDiv.className = 'status success';
+                        statusDiv.innerHTML = '✓ Image processed successfully!';
+                    } else {
+                        statusDiv.className = 'status error';
+                        statusDiv.innerHTML = '✗ ' + (data.error || 'Error processing image');
+                    }
+                })
+                .catch(error => {
+                    statusDiv.className = 'status error';
+                    statusDiv.innerHTML = '✗ ' + error.message;
+                });
+        }
+
+        function resetUpload() {
+            document.getElementById('file-input').value = '';
+            document.getElementById('result-container').style.display = 'none';
+            document.getElementById('upload-status').innerHTML = '';
+            document.getElementById('upload-status').className = 'status';
+        }
+
+        // Load gesture information
+        function loadGestureInfo() {
+            fetch('/api/gesture-info')
+                .then(response => response.json())
+                .then(gestures => {
+                    const grid = document.getElementById('gesture-grid');
+                    grid.innerHTML = Object.entries(gestures).map(([name, description]) => `
+                        <div class="gesture-card">
+                            <h3>${name}</h3>
+                            <p>${description}</p>
+                        </div>
+                    `).join('');
+                })
+                .catch(error => {
+                    console.error('Error loading gestures:', error);
+                });
+        }
+
+        // Initialize camera status
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const cameraStatus = document.getElementById('camera-status');
+                cameraStatus.className = 'status success';
+                cameraStatus.innerHTML = '✓ Camera ready';
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
